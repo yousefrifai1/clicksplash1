@@ -106,8 +106,15 @@ def get_check_float( i):
     except ValueError:
         return( -1)
     
+def get_check_int( i):
+    try:
+        return( int(i))
+    except ValueError:
+        return( -1)
+    
 def get_save_data():
     # declare and initialise variables
+    global v_loop
     global v_drop1duration
     global v_delay1duration
     global v_drop1inc
@@ -141,31 +148,43 @@ def get_save_data():
     v_delay4duration = 0
     v_drop4inc = 0
     v_delay4inc = 0    
-    
+# Get Loops data
+    x = get_check_int(loops_value.get())
+    if( x < 1):
+        messagebox.showerror("Error", "Please enter a valid number larger than 0 for loops")
+        loops_entry.focus_set()
+        return
+    v_loop = x
+# First drop data    
     x = get_check_float( drop1duration.get())
     if( x == -1):
         messagebox.showerror("Error", "Please enter a valid number in Drop 1 Duration")
         drop1entry.focus_set()
-        return     
+        return
+    v_drop1duration = x
+    
     x = get_check_float( delay1duration.get())
     if( x == -1):
         messagebox.showerror("Error", "Please enter a valid number in delay after drop 1")
         delay1entry.focus_set()
         return
+    v_delay1duration = x
+
+    if( v_loop > 1):  
+        x = get_check_float( drop1inc.get())
+        if( x == -1):
+            messagebox.showerror("Error", "Please enter a valid number in Drop 1 increment")
+            drop1inc_entry.focus_set()
+            return
+        v_drop1inc = x
+        
+        x = get_check_float( delay1inc_duration.get())
+        if( x == -1):
+            messagebox.showerror("Error", "Please enter a valid number in delay after drop 1 increment")
+            delay1inc_entry.focus_set()
+            return
+        v_delay1inc    
     if(radSel < 2):
-        return   
-    x = get_check_float( drop2duration.get())
-    if( x == -1):
-        messagebox.showerror("Error", "Please enter a valid number in Drop 2 Duration")
-        drop2entry.focus_set()
-        return
-    
-    x = get_check_float( delay2duration.get())
-    if( x == -1):
-        messagebox.showerror("Error", "Please enter a valid number in delay after drop 2")
-        delay2entry.focus_set()
-        return
-    if(radSel < 3):
         return   
 
         #cur.execute("INSERT INTO Cars VALUES(1,'Audi',52642)")
@@ -176,7 +195,7 @@ def clickMe():
 # Adding water drop duration
 
 drop1duration = tk.StringVar()
-drop1entry = ttk.Entry(droptab, width=5, textvariable=drop1duration, )
+drop1entry = ttk.Entry(droptab, width=5, textvariable=drop1duration)
 drop1entry.grid(column=1, row=1)
 
 drop1inc = tk.StringVar()
