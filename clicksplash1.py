@@ -186,7 +186,98 @@ def get_save_data():
         v_delay1inc    
     if(radSel < 2):
         return   
+# Second drop data    
+    x = get_check_float( drop2duration.get())
+    if( x == -1):
+        messagebox.showerror("Error", "Please enter a valid number in Drop 2 Duration")
+        drop2entry.focus_set()
+        return
+    v_drop2duration = x
+    
+    x = get_check_float( delay2duration.get())
+    if( x == -1):
+        messagebox.showerror("Error", "Please enter a valid number in delay after drop 2")
+        delay2entry.focus_set()
+        return
+    v_delay2duration = x
 
+    if( v_loop > 1):  
+        x = get_check_float( drop2inc.get())
+        if( x == -1):
+            messagebox.showerror("Error", "Please enter a valid number in Drop 2 increment")
+            drop2inc_entry.focus_set()
+            return
+        v_drop2inc = x
+        
+        x = get_check_float( delay2inc_duration.get())
+        if( x == -1):
+            messagebox.showerror("Error", "Please enter a valid number in delay after drop 2 increment")
+            delay2inc_entry.focus_set()
+            return
+        v_delay2inc    
+    if(radSel < 3):
+        return
+# Third drop data    
+    x = get_check_float( drop3duration.get())
+    if( x == -1):
+        messagebox.showerror("Error", "Please enter a valid number in Drop 3 Duration")
+        drop3entry.focus_set()
+        return
+    v_drop3duration = x
+    
+    x = get_check_float( delay3duration.get())
+    if( x == -1):
+        messagebox.showerror("Error", "Please enter a valid number in delay after drop 3")
+        delay3entry.focus_set()
+        return
+    v_delay3duration = x
+
+    if( v_loop > 1):  
+        x = get_check_float( drop3inc.get())
+        if( x == -1):
+            messagebox.showerror("Error", "Please enter a valid number in Drop 3 increment")
+            drop3inc_entry.focus_set()
+            return
+        v_drop3inc = x
+        
+        x = get_check_float( delay3inc_duration.get())
+        if( x == -1):
+            messagebox.showerror("Error", "Please enter a valid number in delay after drop 3 increment")
+            delay3inc_entry.focus_set()
+            return
+        v_delay3inc    
+    if(radSel < 4):
+        return
+# Forth drop data    
+    x = get_check_float( drop4duration.get())
+    if( x == -1):
+        messagebox.showerror("Error", "Please enter a valid number in Drop 4 Duration")
+        drop4entry.focus_set()
+        return
+    v_drop4duration = x
+    
+    x = get_check_float( delay4duration.get())
+    if( x == -1):
+        messagebox.showerror("Error", "Please enter a valid number in delay after drop 4")
+        delay4entry.focus_set()
+        return
+    v_delay4duration = x
+
+    if( v_loop > 1):  
+        x = get_check_float( drop4inc.get())
+        if( x == -1):
+            messagebox.showerror("Error", "Please enter a valid number in Drop 4 increment")
+            drop4inc_entry.focus_set()
+            return
+        v_drop4inc = x
+        
+        x = get_check_float( delay4inc_duration.get())
+        if( x == -1):
+            messagebox.showerror("Error", "Please enter a valid number in delay after drop 4 increment")
+            delay4inc_entry.focus_set()
+            return
+        v_delay4inc    
+        
         #cur.execute("INSERT INTO Cars VALUES(1,'Audi',52642)")
 def clickMe():
     create_tables()
