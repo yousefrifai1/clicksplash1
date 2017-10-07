@@ -37,6 +37,9 @@ droptab.grid(column=0, row=0, padx=8, pady=4)
 incrtab = ttk.LabelFrame(tab2, text=' Increments parameters ')
 incrtab.grid(column=0, row=0, padx=8, pady=4)
 
+savetab = ttk.LabelFrame(tab3, text=' Save and Load ')
+savetab.grid(column=0, row=0, padx=8, pady=4)
+
 # Modify adding a Label
 dropsLable = ttk.Label(droptab, text="Number of Drops")
 dropsLable.grid(column=0, row=0)
@@ -51,7 +54,11 @@ for col in range(4):
     delayLable.grid(column=2, row=col+1, padx=10)
     delayLable = ttk.Label(incrtab, text="Delay after drop " + str(col+1) + " increment(ms): ")
     delayLable.grid(column=2, row=col+1, padx=10)
-
+# Save and Load Lables
+save_nameLable = ttk.Label(savetab, text="Name of Loop to save:")
+save_nameLable.grid(column=0, row=1,sticky=tk.W)
+save_nameLable = ttk.Label(savetab, text="Comment to save with the loop:")
+save_nameLable.grid(column=0, row=2,sticky=tk.W)
 # Loops lable
 incrLable = ttk.Label(incrtab, text="Number of loops: ")
 incrLable.grid(column=0, row=6, sticky=tk.W)
@@ -350,6 +357,14 @@ delay4inc_duration = tk.StringVar()
 delay4inc_entry = ttk.Entry(incrtab, width=5, textvariable=delay4inc_duration)
 delay4inc_entry.grid(column=3, row=4)
 
+# Save entries
+save_name_v = tk.StringVar()
+save_name_entry = ttk.Entry(savetab, width=25, textvariable=save_name_v)
+save_name_entry.grid(column=1, row=1, sticky=tk.W)
+
+save_comment_v = tk.StringVar()
+save_comment_entry = ttk.Entry(savetab, width=35, textvariable=save_comment_v)
+save_comment_entry.grid(column=1, row=2, sticky=tk.W)
 
 # The processing buttons
 action = ttk.Button(droptab, text="Start Process", command=clickMe)
