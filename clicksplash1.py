@@ -74,10 +74,11 @@ def create_tables():
     with con:   
         cur = con.cursor()
         create_inputtab = """CREATE TABLE IF NOT EXISTS inputtab(
-                                 name TEXT,
+                                 name TEXT PRIMERY KEY UNIQUE,
+                                 photo INT,
                                  drop1duration REAL,
                                  drop1delay REAL,
-                                 drop1inc REAL,
+                                 drop1inc REAL,                               
                                  delay1inc REAL,                                 
                                  drop2duration REAL,
                                  drop2delay REAL,
@@ -87,17 +88,17 @@ def create_tables():
                                  drop3delay REAL,
                                  drop3inc REAL,
                                  delay3inc REAL,                                 
-                                 drop4duration REAL,
+                                 drop4duration REAL,                                
                                  drop4delay REAL,
                                  drop4inc REAL,
                                  delay4inc REAL,
                                  loops INT,
-                                 delay_loops REAL,
+                                 loop_delay INT,                                 
                                  comments TEXT
                              ); """        
         cur.execute(create_inputtab)
         create_outputtab = """CREATE TABLE IF NOT EXISTS outputtab(
-                                 photo TEXT,
+                                 photo INT,
                                  drop1duration REAL,
                                  drop1delay REAL,
                                  drop2duration REAL,
@@ -124,7 +125,9 @@ def get_check_int( i):
     
 def get_save_data():
     # declare and initialise variables
-    global v_loop
+
+    global v_save_name
+    global v_photo_number
     global v_drop1duration
     global v_delay1duration
     global v_drop1inc
@@ -141,12 +144,17 @@ def get_save_data():
     global v_delay4duration
     global v_drop4inc
     global v_delay4inc
-    global v_save_name
+    global v_loops
+    global v_loop_delay
     global v_save_comment
-    global v_photo_number
+    global v_inputtab_data
 
     # Get save name and comment
     v_save_name = save_name.get()
+    if( v_save_name == ''):
+        messagebox.showerror("Error", "The save name cannot be empty")
+        loops_entry.focus_set()
+        return
     v_save_comment = save_comment.get()
     
     v_drop1duration = 0
@@ -171,7 +179,14 @@ def get_save_data():
         messagebox.showerror("Error", "Please enter a valid number larger than 0 for loops")
         loops_entry.focus_set()
         return
-    v_loop = x
+    v_loops = x
+    x = get_check_int(delay_loop.get())
+    if( x < 0 ):
+        messagebox.showerror("Error", "Please enter a valid number larger than 0 for loop delay")
+        delay_loop_entry.focus_set()
+        return
+    v_loop_delay = x
+    
 # Get photo_number data
     x = get_check_int(photo_number_value.get())
     if( x < 1):
@@ -194,7 +209,7 @@ def get_save_data():
         return
     v_delay1duration = x
 
-    if( v_loop > 1):  
+    if( v_loops > 1):  
         x = get_check_float( drop1inc.get())
         if( x == -1):
             messagebox.showerror("Error", "Please enter a valid number in Drop 1 increment")
@@ -225,7 +240,7 @@ def get_save_data():
         return
     v_delay2duration = x
 
-    if( v_loop > 1):  
+    if( v_loops > 1):  
         x = get_check_float( drop2inc.get())
         if( x == -1):
             messagebox.showerror("Error", "Please enter a valid number in Drop 2 increment")
@@ -256,7 +271,7 @@ def get_save_data():
         return
     v_delay3duration = x
 
-    if( v_loop > 1):  
+    if( v_loops > 1):  
         x = get_check_float( drop3inc.get())
         if( x == -1):
             messagebox.showerror("Error", "Please enter a valid number in Drop 3 increment")
@@ -287,7 +302,7 @@ def get_save_data():
         return
     v_delay4duration = x
 
-    if( v_loop > 1):  
+    if( v_loops > 1):  
         x = get_check_float( drop4inc.get())
         if( x == -1):
             messagebox.showerror("Error", "Please enter a valid number in Drop 4 increment")
@@ -301,11 +316,42 @@ def get_save_data():
             delay4inc_entry.focus_set()
             return
         v_delay4inc
+
+def load_data():
+    inputtab_data = (
+        v_save_name,
+        v_photo_number,
+        v_drop1duration,
+        v_delay1duration,
+        v_drop1inc,
+        v_delay1inc,
+        v_drop2duration,
+        v_delay2duration,
+        v_drop2inc,
+        v_delay2inc,
+        v_drop3duration,
+        v_delay3duration,
+        v_drop3inc,
+        v_delay3inc,
+        v_drop4duration,
+        v_delay4duration,
+        v_drop4inc,
+        v_delay4inc,
+        v_loops,
+        v_loop_delay,
+        v_save_comment
+    )
+    statement = """ INSERT INTO inputtab VALUES( ?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?)"""
+    con = lite.connect('clicksplashdb.db')
+    with con:   
+        cur = con.cursor()
+        cur.execute(statement, inputtab_data)
     
         #cur.execute("INSERT INTO Cars VALUES(1,'Audi',52642)")
 def clickMe():
     get_save_data()    
     create_tables()
+    load_data()
 
     
 # Adding water drop duration
