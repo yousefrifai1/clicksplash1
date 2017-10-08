@@ -64,6 +64,8 @@ incrLable = ttk.Label(incrtab, text="Number of loops: ")
 incrLable.grid(column=0, row=6, sticky=tk.W)
 incrLable = ttk.Label(incrtab, text="Delay after loop (s): ")
 incrLable.grid(column=2, row=6, sticky=tk.W, padx=10 )
+incrLable = ttk.Label(incrtab, text="Photo Number: ")
+incrLable.grid(column=0, row=7, sticky=tk.W)
 
 # Modified Button Click Functions
 # Sql function
@@ -72,21 +74,21 @@ def create_tables():
     with con:   
         cur = con.cursor()
         create_inputtab = """CREATE TABLE IF NOT EXISTS inputtab(
-                                 tag TEXT,
+                                 name TEXT,
                                  drop1duration REAL,
                                  drop1delay REAL,
+                                 drop1inc REAL,
+                                 delay1inc REAL,                                 
                                  drop2duration REAL,
                                  drop2delay REAL,
+                                 drop2inc REAL,
+                                 delay2inc REAL,                                 
                                  drop3duration REAL,
                                  drop3delay REAL,
+                                 drop3inc REAL,
+                                 delay3inc REAL,                                 
                                  drop4duration REAL,
                                  drop4delay REAL,
-                                 drop1inc REAL,
-                                 delay1inc REAL,
-                                 drop2inc REAL,
-                                 delay2inc REAL,
-                                 drop3inc REAL,
-                                 delay3inc REAL,
                                  drop4inc REAL,
                                  delay4inc REAL,
                                  loops INT,
@@ -107,6 +109,7 @@ def create_tables():
                                  comments TEXT
                              ); """
         cur.execute(create_outputtab)
+
 def get_check_float( i):
     try:
         return( float(i))
@@ -138,7 +141,14 @@ def get_save_data():
     global v_delay4duration
     global v_drop4inc
     global v_delay4inc
+    global v_save_name
+    global v_save_comment
+    global v_photo_number
 
+    # Get save name and comment
+    v_save_name = save_name.get()
+    v_save_comment = save_comment.get()
+    
     v_drop1duration = 0
     v_delay1duration = 0
     v_drop1inc = 0
@@ -162,6 +172,13 @@ def get_save_data():
         loops_entry.focus_set()
         return
     v_loop = x
+# Get photo_number data
+    x = get_check_int(photo_number_value.get())
+    if( x < 1):
+        messagebox.showerror("Error", "Please enter a valid positive number for photo_number")
+        photo_number_entry.focus_set()
+        return
+    v_photo_number = x    
 # First drop data    
     x = get_check_float( drop1duration.get())
     if( x == -1):
@@ -283,12 +300,13 @@ def get_save_data():
             messagebox.showerror("Error", "Please enter a valid number in delay after drop 4 increment")
             delay4inc_entry.focus_set()
             return
-        v_delay4inc    
-        
+        v_delay4inc
+    
         #cur.execute("INSERT INTO Cars VALUES(1,'Audi',52642)")
 def clickMe():
+    get_save_data()    
     create_tables()
-    get_save_data()
+
     
 # Adding water drop duration
 
@@ -358,12 +376,12 @@ delay4inc_entry = ttk.Entry(incrtab, width=5, textvariable=delay4inc_duration)
 delay4inc_entry.grid(column=3, row=4)
 
 # Save entries
-save_name_v = tk.StringVar()
-save_name_entry = ttk.Entry(savetab, width=25, textvariable=save_name_v)
+save_name = tk.StringVar()
+save_name_entry = ttk.Entry(savetab, width=25, textvariable=save_name)
 save_name_entry.grid(column=1, row=1, sticky=tk.W)
 
-save_comment_v = tk.StringVar()
-save_comment_entry = ttk.Entry(savetab, width=35, textvariable=save_comment_v)
+save_comment = tk.StringVar()
+save_comment_entry = ttk.Entry(savetab, width=35, textvariable=save_comment)
 save_comment_entry.grid(column=1, row=2, sticky=tk.W)
 
 # The processing buttons
@@ -371,7 +389,7 @@ action = ttk.Button(droptab, text="Start Process", command=clickMe)
 action.grid(column=0, row=6, sticky=tk.W)
 action.configure(state='disabled')    # Disable the Button Widget
 action1 = ttk.Button(incrtab, text="Start Process", command=clickMe)
-action1.grid(column=0, row=7, sticky=tk.W)
+action1.grid(column=0, row=8, sticky=tk.W)
 action1.configure(state='disabled')    # Disable the Button Widget
 
 # Add loops entry
@@ -383,6 +401,12 @@ delay_loop = tk.StringVar()
 delay_loop_entry = ttk.Entry(incrtab, width=5, textvariable=delay_loop)
 delay_loop_entry.grid(column=3, row=6)
 delay_loop.set("0")
+
+# Add photo number
+photo_number_value = tk.StringVar()
+photo_number_entry = ttk.Entry(incrtab, width=5, textvariable=photo_number_value)
+photo_number_entry.grid(column=1, row=7)
+photo_number_value.set("1")
 
 radVar = tk.IntVar()
 
