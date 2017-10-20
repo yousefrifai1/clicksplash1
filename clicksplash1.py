@@ -26,7 +26,7 @@ tab2 = ttk.Frame(tabControl)            # Add a second tab
 tabControl.add(tab2, text='Loops')      # Make second tab visible
 
 tab3 = ttk.Frame(tabControl)            # Add a second tab
-tabControl.add(tab3, text='Save & Load')      # Make second tab visible
+tabControl.add(tab3, text='Save & Open')      # Make second tab visible
 
 tabControl.pack(expand=1, fill="both")  # Pack to make visible
 # ~ Tab Control introduced here -----------------------------------------
@@ -37,8 +37,10 @@ droptab.grid(column=0, row=0, padx=8, pady=4)
 incrtab = ttk.LabelFrame(tab2, text=' Increments parameters ')
 incrtab.grid(column=0, row=0, padx=8, pady=4)
 
-savetab = ttk.LabelFrame(tab3, text=' Save and Load ')
+savetab = ttk.LabelFrame(tab3, text=' Save')
 savetab.grid(column=0, row=0, padx=8, pady=4)
+opentab = ttk.LabelFrame(tab3, text=' Open ')
+opentab.grid(column=0, row=1, padx=8, pady=4, sticky=tk.W)
 
 # Modify adding a Label
 dropsLable = ttk.Label(droptab, text="Number of Drops")
@@ -54,11 +56,16 @@ for col in range(4):
     delayLable.grid(column=2, row=col+1, padx=10)
     delayLable = ttk.Label(incrtab, text="Delay after drop " + str(col+1) + " increment(ms): ")
     delayLable.grid(column=2, row=col+1, padx=10)
-# Save and Load Lables
+# Save Lables
 save_nameLable = ttk.Label(savetab, text="Name of Loop to save:")
 save_nameLable.grid(column=0, row=1,sticky=tk.W)
 save_nameLable = ttk.Label(savetab, text="Comment to save with the loop:")
 save_nameLable.grid(column=0, row=2,sticky=tk.W)
+
+# Open Labels
+openDB_Lable = ttk.Label(opentab, text="Name of Database to open:")
+openDB_Lable.grid(column=0, row=1,sticky=tk.W)
+
 # Loops lable
 incrLable = ttk.Label(incrtab, text="Number of loops: ")
 incrLable.grid(column=0, row=6, sticky=tk.W)
@@ -70,7 +77,7 @@ incrLable.grid(column=0, row=7, sticky=tk.W)
 # Modified Button Click Functions
 # Sql function
 def create_tables():
-    con = lite.connect('clicksplashdb.db')
+    con = lite.connect(v_db_name)
     with con:   
         cur = con.cursor()
         create_inputtab = """CREATE TABLE IF NOT EXISTS inputtab(
@@ -147,7 +154,8 @@ def get_save_data():
     global v_loops
     global v_loop_delay
     global v_save_comment
-    global v_inputtab_data
+    global v_db_name
+
 
     # Get save name and comment
     v_save_name = save_name.get()
@@ -155,6 +163,13 @@ def get_save_data():
         messagebox.showerror("Error", "The save name cannot be empty")
         loops_entry.focus_set()
         return
+    v_db_name = db_name.get()
+    if( v_db_name == ''):
+        messagebox.showerror("Error", "The database name cannot be empty")
+        db_name_entry.focus_set()
+        return
+    v_db_name = v_db_name + ".db"
+    
     v_save_comment = save_comment.get()
     
     v_drop1duration = 0
@@ -222,7 +237,7 @@ def get_save_data():
             messagebox.showerror("Error", "Please enter a valid number in delay after drop 1 increment")
             delay1inc_entry.focus_set()
             return
-        v_delay1inc    
+        v_delay1inc = x   
     if(radSel < 2):
         return   
 # Second drop data    
@@ -253,7 +268,7 @@ def get_save_data():
             messagebox.showerror("Error", "Please enter a valid number in delay after drop 2 increment")
             delay2inc_entry.focus_set()
             return
-        v_delay2inc    
+        v_delay2inc = x   
     if(radSel < 3):
         return
 # Third drop data    
@@ -284,7 +299,7 @@ def get_save_data():
             messagebox.showerror("Error", "Please enter a valid number in delay after drop 3 increment")
             delay3inc_entry.focus_set()
             return
-        v_delay3inc    
+        v_delay3inc = x   
     if(radSel < 4):
         return
 # Forth drop data    
@@ -315,9 +330,11 @@ def get_save_data():
             messagebox.showerror("Error", "Please enter a valid number in delay after drop 4 increment")
             delay4inc_entry.focus_set()
             return
-        v_delay4inc
+        v_delay4inc = x
 
-def load_data():
+# Insert loop information in the database.
+def save_loop():
+    global v_inputtab_data    
     inputtab_data = (
         v_save_name,
         v_photo_number,
@@ -347,11 +364,68 @@ def load_data():
         cur = con.cursor()
         cur.execute(statement, inputtab_data)
     
-        #cur.execute("INSERT INTO Cars VALUES(1,'Audi',52642)")
+def process_input():
+    global v_next_photo
+    global v_next_drop1duration
+    global v_next_drop1delay
+    global v_next_drop2duration
+    global v_next_drop2delay
+    global v_next_drop3duration
+    global v_next_drop3delay
+    global v_next_drop4duration
+    global v_next_drop4delay
+    global v_next_comments
+
+    v_next_photo = v_photo_number
+    v_next_drop1duration = v_drop1duration
+    v_next_drop1delay = v_delay1duration
+    v_next_drop2duration = v_drop2duration
+    v_next_drop2delay = v_delay2duration
+    v_next_drop3duration = v_drop3duration
+    v_next_drop3delay = v_delay3duration
+    v_next_drop4duration = v_drop4duration
+    v_next_drop4delay = v_delay4duration
+    v_next_comments = ""
+    insert_output()
+    for seq in range(2, v_loops ):
+        v_next_photo = v_next_photo +1
+        v_next_drop1duration = v_next_drop1duration + v_drop1inc
+        v_next_drop1delay = v_next_drop1delay + v_delay1inc
+        if (radSel > 1):
+            v_next_drop2duration = v_next_drop2duration + v_drop2inc
+            v_next_drop2delay = v_next_drop2delay + v_delay2inc
+        if (radSel > 2):
+            v_next_drop3duration = v_next_drop3duration + v_drop3inc
+            v_next_drop3delay = v_next_drop3delay + v_delay3inc            
+        if (radSel > 3):
+            v_next_drop4duration = v_next_drop4duration + v_drop4inc
+            v_next_drop4delay = v_next_drop4delay + v_delay4inc
+        insert_output()    
+        
+def insert_output():
+    outputtab_data = (
+        v_next_photo ,
+        v_next_drop1duration ,
+        v_next_drop1delay  ,
+        v_next_drop2duration ,
+        v_next_drop2delay  ,
+        v_next_drop3duration ,
+        v_next_drop3delay ,
+        v_next_drop4duration ,
+        v_next_drop4delay ,
+        v_next_comments 
+        )
+    statement = """ INSERT INTO outputtab VALUES( ?,?,?,?,?, ?,?,?,?,?)"""
+    con = lite.connect('clicksplashdb.db')
+    with con:   
+        cur = con.cursor()
+        cur.execute(statement, outputtab_data)
+    
 def clickMe():
     get_save_data()    
     create_tables()
-    load_data()
+    save_loop()
+    process_input()
 
     
 # Adding water drop duration
@@ -429,6 +503,12 @@ save_name_entry.grid(column=1, row=1, sticky=tk.W)
 save_comment = tk.StringVar()
 save_comment_entry = ttk.Entry(savetab, width=35, textvariable=save_comment)
 save_comment_entry.grid(column=1, row=2, sticky=tk.W)
+
+# Open entries
+db_name = tk.StringVar()
+db_name_entry = ttk.Entry(opentab, width=25, textvariable=db_name)
+db_name_entry.grid(column=1, row=1, sticky=tk.W)
+db_name.set("clicksplashdb")
 
 # The processing buttons
 action = ttk.Button(droptab, text="Start Process", command=clickMe)
