@@ -82,10 +82,15 @@ incrLable.grid(column=2, row=6, sticky=tk.W, padx=10 )
 incrLable = ttk.Label(incrtab, text="Photo Number: ")
 incrLable.grid(column=0, row=7, sticky=tk.W)
 
+# open database
+def open_db(db_name):
+    global con
+    con = lite.connect(db_name)
+
 # Modified Button Click Functions
 # Sql function
 def create_tables():
-    con = lite.connect(v_db_name)
+#    con = lite.connect(v_db_name)
     with con:   
         cur = con.cursor()
         create_inputtab = """CREATE TABLE IF NOT EXISTS inputtab(
@@ -367,7 +372,7 @@ def save_loop():
         v_save_comment
     )
     statement = """ INSERT INTO inputtab VALUES( ?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?)"""
-    con = lite.connect('clicksplashdb.db')
+#    con = lite.connect(v_db_name)
     with con:   
         cur = con.cursor()
         cur.execute(statement, inputtab_data)
@@ -394,7 +399,7 @@ def process_input():
     v_next_drop4duration = v_drop4duration
     v_next_drop4delay = v_delay4duration
     v_next_comments = ""
-    if (save_tick.get == 1):
+    if (save_tick.get() == 1):
         insert_output()
     for seq in range(2, v_loops ):
         v_next_photo = v_next_photo +1
@@ -409,7 +414,7 @@ def process_input():
         if (radSel > 3):
             v_next_drop4duration = v_next_drop4duration + v_drop4inc
             v_next_drop4delay = v_next_drop4delay + v_delay4inc
-        if (save_tick.get == 1):    
+        if (save_tick.get() == 1):    
             insert_output()    
         
 def insert_output():
@@ -426,7 +431,7 @@ def insert_output():
         v_next_comments 
         )
     statement = """ INSERT INTO outputtab VALUES( ?,?,?,?,?, ?,?,?,?,?)"""
-    con = lite.connect('clicksplashdb.db')
+#    con = lite.connect(v_db_name)
     with con:   
         cur = con.cursor()
         cur.execute(statement, outputtab_data)
@@ -453,9 +458,10 @@ def open_action():
         open_photo()
     
 def clickMe():
-    get_save_data()    
+    get_save_data()
+    open_db(v_db_name)
     create_tables()
-    if (save_tick.get == 1):
+    if (save_tick.get() == 1):
         save_loop()
     process_input()
 
