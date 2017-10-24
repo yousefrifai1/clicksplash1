@@ -61,10 +61,18 @@ save_nameLable = ttk.Label(savetab, text="Name of Loop to save:")
 save_nameLable.grid(column=0, row=1,sticky=tk.W)
 save_nameLable = ttk.Label(savetab, text="Comment to save with the loop:")
 save_nameLable.grid(column=0, row=2,sticky=tk.W)
+save_nameLable = ttk.Label(savetab, text="Tick to save:")
+save_nameLable.grid(column=0, row=3,sticky=tk.W)
 
 # Open Labels
 openDB_Lable = ttk.Label(opentab, text="Name of Database to open:")
 openDB_Lable.grid(column=0, row=1,sticky=tk.W)
+openDB_Lable = ttk.Label(opentab, text="Load:")
+openDB_Lable.grid(column=0, row=2,sticky=tk.W)
+openDB_Lable = ttk.Label(opentab, text="Name of Loop to Load:")
+openDB_Lable.grid(column=0, row=4,sticky=tk.W)
+openDB_Lable = ttk.Label(opentab, text="Photo Number:")
+openDB_Lable.grid(column=2, row=4,sticky=tk.W)
 
 # Loops lable
 incrLable = ttk.Label(incrtab, text="Number of loops: ")
@@ -105,7 +113,7 @@ def create_tables():
                              ); """        
         cur.execute(create_inputtab)
         create_outputtab = """CREATE TABLE IF NOT EXISTS outputtab(
-                                 photo INT,
+                                 photo INT PRIMERY KEY UNIQUE,
                                  drop1duration REAL,
                                  drop1delay REAL,
                                  drop2duration REAL,
@@ -386,7 +394,8 @@ def process_input():
     v_next_drop4duration = v_drop4duration
     v_next_drop4delay = v_delay4duration
     v_next_comments = ""
-    insert_output()
+    if (save_tick.get == 1):
+        insert_output()
     for seq in range(2, v_loops ):
         v_next_photo = v_next_photo +1
         v_next_drop1duration = v_next_drop1duration + v_drop1inc
@@ -400,7 +409,8 @@ def process_input():
         if (radSel > 3):
             v_next_drop4duration = v_next_drop4duration + v_drop4inc
             v_next_drop4delay = v_next_drop4delay + v_delay4inc
-        insert_output()    
+        if (save_tick.get == 1):    
+            insert_output()    
         
 def insert_output():
     outputtab_data = (
@@ -420,11 +430,33 @@ def insert_output():
     with con:   
         cur = con.cursor()
         cur.execute(statement, outputtab_data)
+
+def open_loop():
+    v_open_name = open_name.get()
+    if( v_open_name == ''):
+        messagebox.showerror("Error", "The loading loop name cannot be empty")
+        open_name_entry.focus_set()
+        return
+        
+
+def open_photo():
+    v_open_photo_value = get_check_int(open_photo_value.get())
+    if( v_open_photo_value == -1):
+        messagebox.showerror("Error", "The photo number must be a valid positive number")
+        return
+    
+
+def open_action():
+    if( OpenRadSel == 1):
+        open_loop()
+    elif (OpenRadSel == 2):
+        open_photo()
     
 def clickMe():
     get_save_data()    
     create_tables()
-    save_loop()
+    if (save_tick.get == 1):
+        save_loop()
     process_input()
 
     
@@ -504,11 +536,22 @@ save_comment = tk.StringVar()
 save_comment_entry = ttk.Entry(savetab, width=35, textvariable=save_comment)
 save_comment_entry.grid(column=1, row=2, sticky=tk.W)
 
+save_tick = tk.IntVar()
+save_tick_entry = ttk.Checkbutton(savetab, variable=save_tick)
+save_tick_entry.grid(column=1, row=3, sticky=tk.W)
+save_tick.set(1)
+
 # Open entries
 db_name = tk.StringVar()
 db_name_entry = ttk.Entry(opentab, width=25, textvariable=db_name)
 db_name_entry.grid(column=1, row=1, sticky=tk.W)
 db_name.set("clicksplashdb")
+open_name = tk.StringVar()
+open_name_entry = ttk.Entry(opentab, width=25, textvariable=open_name)
+open_name_entry.grid(column=1, row=4, sticky=tk.W)
+open_photo_value = tk.StringVar()
+open_photo_entry = ttk.Entry(opentab, width=5, textvariable=open_photo_value)
+open_photo_entry.grid(column=3, row=4, sticky=tk.W)
 
 # The processing buttons
 action = ttk.Button(droptab, text="Start Process", command=clickMe)
@@ -536,6 +579,25 @@ photo_number_value.set("1")
 
 radVar = tk.IntVar()
 
+def OpenRadCall():            
+    global OpenRadSel
+    OpenRadSel=OpenRadVar.get()
+    if (OpenRadSel == 1):
+        open_photo_entry.configure(state='disabled')
+        open_name_entry.configure(state='normal')
+        open_button.configure(state='normal')
+        open_button.configure(text='Load Loop ')
+    elif (OpenRadSel == 2):
+        open_photo_entry.configure(state='normal')
+        open_name_entry.configure(state='disabled')
+        open_button.configure(state='normal')
+        open_button.configure(text='Load Photo Number ')                      
+    elif (OpenRadSel == 3):
+        open_photo_entry.configure(state='disabled')
+        open_name_entry.configure(state='disabled')
+        open_button.configure(text='Click on Loop or Photo to load ')
+        open_button.configure(state='disabled')
+    
 def radCall():
     action.configure(state='normal')
     action1.configure(state='normal')            
@@ -610,7 +672,6 @@ def radCall():
 
 tk.Label(droptab, text="Number of Drops:").grid(column=0, row=0)
 # create 4 Radiobuttons using one variable
-
 rad1 = tk.Radiobutton(droptab, text="1", variable=radVar, value=1, command=radCall)
 rad1.grid(column=1, row=0)   
 rad2 = tk.Radiobutton(droptab, text="2", variable=radVar, value=2, command=radCall)
@@ -620,7 +681,22 @@ rad3.grid(column=3, row=0)
 rad4 = tk.Radiobutton(droptab, text="4", variable=radVar, value=4, command=radCall)
 rad4.grid(column=4, row=0)
 
-   
+# Create 3 Radio Buttons
+OpenRadVar = tk.IntVar()
+OpenRad1 = tk.Radiobutton(opentab, text="Loop", variable=OpenRadVar, value=1, command=OpenRadCall)
+OpenRad1.grid(column=0, row=3, sticky=tk.W)   
+OpenRad2 = tk.Radiobutton(opentab, text="Photo", variable=OpenRadVar, value=2, command=OpenRadCall)
+OpenRad2.grid(column=1, row=3, sticky=tk.W)   
+OpenRad3 = tk.Radiobutton(opentab, text="None", variable=OpenRadVar, value=3, command=OpenRadCall)
+OpenRad3.grid(column=2, row=3, sticky=tk.W)
+OpenRadVar.set(3)
+open_photo_entry.configure(state='disabled')
+open_name_entry.configure(state='disabled')
+# Open button
+open_button = ttk.Button(opentab, text="Click on Loop or Photo to load ", command=open_action)
+open_button.grid(column=0, row=5, sticky=tk.W)
+open_button.configure(state='disabled')    # Disable the Button Widget
+
 #======================
 # Start GUI
 #======================
