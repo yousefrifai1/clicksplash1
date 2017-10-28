@@ -94,8 +94,9 @@ def create_tables():
     with con:   
         cur = con.cursor()
         create_inputtab = """CREATE TABLE IF NOT EXISTS inputtab(
-                                 name TEXT PRIMERY KEY UNIQUE,
+                                 loopname TEXT PRIMERY KEY UNIQUE,
                                  photo INT,
+                                 drops INT,
                                  drop1duration REAL,
                                  drop1delay REAL,
                                  drop1inc REAL,                               
@@ -119,6 +120,8 @@ def create_tables():
         cur.execute(create_inputtab)
         create_outputtab = """CREATE TABLE IF NOT EXISTS outputtab(
                                  photo INT PRIMERY KEY UNIQUE,
+                                 loopname TEXT,
+                                 drops INT,
                                  drop1duration REAL,
                                  drop1delay REAL,
                                  drop2duration REAL,
@@ -142,6 +145,15 @@ def get_check_int( i):
         return( int(i))
     except ValueError:
         return( -1)
+    
+def get_db_name():
+    global v_db_name    
+    v_db_name = db_name.get()
+    if( v_db_name == ''):
+        messagebox.showerror("Error", "The database name cannot be empty")
+        db_name_entry.focus_set()
+        return
+    v_db_name = v_db_name + ".db"
     
 def get_save_data():
     # declare and initialise variables
@@ -167,8 +179,6 @@ def get_save_data():
     global v_loops
     global v_loop_delay
     global v_save_comment
-    global v_db_name
-
 
     # Get save name and comment
     v_save_name = save_name.get()
@@ -176,12 +186,6 @@ def get_save_data():
         messagebox.showerror("Error", "The save name cannot be empty")
         loops_entry.focus_set()
         return
-    v_db_name = db_name.get()
-    if( v_db_name == ''):
-        messagebox.showerror("Error", "The database name cannot be empty")
-        db_name_entry.focus_set()
-        return
-    v_db_name = v_db_name + ".db"
     
     v_save_comment = save_comment.get()
     
@@ -351,6 +355,7 @@ def save_loop():
     inputtab_data = (
         v_save_name,
         v_photo_number,
+        radSel,
         v_drop1duration,
         v_delay1duration,
         v_drop1inc,
@@ -371,7 +376,7 @@ def save_loop():
         v_loop_delay,
         v_save_comment
     )
-    statement = """ INSERT INTO inputtab VALUES( ?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?)"""
+    statement = """ INSERT INTO inputtab VALUES( ?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?,?)"""
 #    con = lite.connect(v_db_name)
     with con:   
         cur = con.cursor()
@@ -420,6 +425,8 @@ def process_input():
 def insert_output():
     outputtab_data = (
         v_next_photo ,
+        v_save_name,
+        radSel ,
         v_next_drop1duration ,
         v_next_drop1delay  ,
         v_next_drop2duration ,
@@ -430,8 +437,7 @@ def insert_output():
         v_next_drop4delay ,
         v_next_comments 
         )
-    statement = """ INSERT INTO outputtab VALUES( ?,?,?,?,?, ?,?,?,?,?)"""
-#    con = lite.connect(v_db_name)
+    statement = """ INSERT INTO outputtab VALUES( ?,?,?,?,?, ?,?,?,?,?, ?,?)"""
     with con:   
         cur = con.cursor()
         cur.execute(statement, outputtab_data)
@@ -442,16 +448,42 @@ def open_loop():
         messagebox.showerror("Error", "The loading loop name cannot be empty")
         open_name_entry.focus_set()
         return
-        
+    statement = """SELECT * FROM inputtab WHERE loopname = ?"""
+    with con:   
+        cur = con.cursor()
+        cur.execute(statement, )
+        row = cur.fetchone()        
 
 def open_photo():
     v_open_photo_value = get_check_int(open_photo_value.get())
     if( v_open_photo_value == -1):
         messagebox.showerror("Error", "The photo number must be a valid positive number")
         return
+    statement = """SELECT * FROM outputtab WHERE photo = ?"""
+    with con:   
+        cur = con.cursor()
+        cur.execute(statement, [open_photo_value.get()])
+        row = cur.fetchone()
+        photo_number_value.set( row[0]) # photo
+        save_name.set( row[1]) # loopname
+        radVar.set( row[2]) # drops
+        drop1duration.set( row[3]) # "drop1duration"
+        delay1duration.set( row[4]) # drop1delay
+        drop2duration.set( row[5]) # drop2duration
+        delay2duration.set( row[6]) # drop2delay
+        drop3duration.set( row[7]) # drop3duration
+        delay3duration.set( row[8]) # drop3delay
+        drop4duration.set( row[9]) # drop4duration
+        delay4duration.set(row[10]) # drop4delay
+        save_comment.set( row[11]) # comments
+    save_tick.set(0)
+    action.configure(state='normal')
+    radCall()
     
 
 def open_action():
+    get_db_name()
+    open_db(v_db_name)    
     if( OpenRadSel == 1):
         open_loop()
     elif (OpenRadSel == 2):
@@ -459,6 +491,7 @@ def open_action():
     
 def clickMe():
     get_save_data()
+    get_db_name()
     open_db(v_db_name)
     create_tables()
     if (save_tick.get() == 1):
@@ -575,7 +608,7 @@ loops_value.set("1")
 delay_loop = tk.StringVar()
 delay_loop_entry = ttk.Entry(incrtab, width=5, textvariable=delay_loop)
 delay_loop_entry.grid(column=3, row=6)
-delay_loop.set("0")
+delay_loop.set("1")
 
 # Add photo number
 photo_number_value = tk.StringVar()
