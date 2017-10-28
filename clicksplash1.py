@@ -451,8 +451,33 @@ def open_loop():
     statement = """SELECT * FROM inputtab WHERE loopname = ?"""
     with con:   
         cur = con.cursor()
-        cur.execute(statement, )
-        row = cur.fetchone()        
+        cur.execute(statement,[open_name.get()] )
+        row = cur.fetchone()
+        save_name.set(row[0] ) # loopname TEXT
+        photo_number_value.set(row[1] ) # photo INT
+        radVar.set(row[2] ) # drops INT
+        drop1duration.set(row[3] ) # drop1duration REAL
+        delay1duration.set(row[4] ) # drop1delay REAL
+        drop1inc.set(row[5] ) # drop1inc REAL
+        delay1inc_duration.set(row[6] ) # delay1inc REAL
+        drop2duration.set(row[7] ) # drop2duration REAL
+        delay2duration.set(row[8] ) # drop2delay REAL
+        drop2inc.set(row[9] ) # drop2inc REAL
+        delay2inc_duration.set(row[10]) # delay2inc REAL
+        drop3duration.set(row[11]) # drop3duration REAL
+        delay3duration.set(row[12]) # drop3delay REAL
+        drop3inc.set(row[13]) # drop3inc REAL
+        delay3inc_duration.set(row[14]) # delay3inc REAL
+        drop4duration.set(row[15]) # drop4duration REAL
+        delay4duration.set(row[16]) # drop4delay REAL
+        drop4inc.set(row[17]) # drop4inc REAL
+        delay4inc_duration.set(row[18]) # delay4inc REAL
+        loops_value.set(row[19]) # loops INT
+        delay_loop.set(row[20]) # loop_delay INT
+        save_comment.set(row[21]) # comments TEXT
+    save_tick.set(0)
+    action.configure(state='normal')
+    radCall()           
 
 def open_photo():
     v_open_photo_value = get_check_int(open_photo_value.get())
@@ -478,8 +503,7 @@ def open_photo():
         save_comment.set( row[11]) # comments
     save_tick.set(0)
     action.configure(state='normal')
-    radCall()
-    
+    radCall()   
 
 def open_action():
     get_db_name()
