@@ -152,8 +152,9 @@ def get_db_name():
     if( v_db_name == ''):
         messagebox.showerror("Error", "The database name cannot be empty")
         db_name_entry.focus_set()
-        return
+        return "ERROR"
     v_db_name = v_db_name + ".db"
+    return "GOOD"
     
 def get_save_data():
     # declare and initialise variables
@@ -185,7 +186,7 @@ def get_save_data():
     if( v_save_name == ''):
         messagebox.showerror("Error", "The save name cannot be empty")
         loops_entry.focus_set()
-        return
+        return "ERROR"
     
     v_save_comment = save_comment.get()
     
@@ -210,13 +211,13 @@ def get_save_data():
     if( x < 1):
         messagebox.showerror("Error", "Please enter a valid number larger than 0 for loops")
         loops_entry.focus_set()
-        return
+        return "ERROR"
     v_loops = x
     x = get_check_int(delay_loop.get())
     if( x < 0 ):
         messagebox.showerror("Error", "Please enter a valid number larger than 0 for loop delay")
         delay_loop_entry.focus_set()
-        return
+        return "ERROR"
     v_loop_delay = x
     
 # Get photo_number data
@@ -224,21 +225,21 @@ def get_save_data():
     if( x < 1):
         messagebox.showerror("Error", "Please enter a valid positive number for photo_number")
         photo_number_entry.focus_set()
-        return
+        return "ERROR"
     v_photo_number = x    
 # First drop data    
     x = get_check_float( drop1duration.get())
     if( x == -1):
         messagebox.showerror("Error", "Please enter a valid number in Drop 1 Duration")
         drop1entry.focus_set()
-        return
+        return "ERROR"
     v_drop1duration = x
     
     x = get_check_float( delay1duration.get())
     if( x == -1):
         messagebox.showerror("Error", "Please enter a valid number in delay after drop 1")
         delay1entry.focus_set()
-        return
+        return "ERROR"
     v_delay1duration = x
 
     if( v_loops > 1):  
@@ -246,30 +247,30 @@ def get_save_data():
         if( x == -1):
             messagebox.showerror("Error", "Please enter a valid number in Drop 1 increment")
             drop1inc_entry.focus_set()
-            return
+            return "ERROR"
         v_drop1inc = x
         
         x = get_check_float( delay1inc_duration.get())
         if( x == -1):
             messagebox.showerror("Error", "Please enter a valid number in delay after drop 1 increment")
             delay1inc_entry.focus_set()
-            return
+            return "ERROR"
         v_delay1inc = x   
     if(radSel < 2):
-        return   
+        return "GOOD"
 # Second drop data    
     x = get_check_float( drop2duration.get())
     if( x == -1):
         messagebox.showerror("Error", "Please enter a valid number in Drop 2 Duration")
         drop2entry.focus_set()
-        return
+        return "ERROR"
     v_drop2duration = x
     
     x = get_check_float( delay2duration.get())
     if( x == -1):
         messagebox.showerror("Error", "Please enter a valid number in delay after drop 2")
         delay2entry.focus_set()
-        return
+        return "ERROR"
     v_delay2duration = x
 
     if( v_loops > 1):  
@@ -277,30 +278,30 @@ def get_save_data():
         if( x == -1):
             messagebox.showerror("Error", "Please enter a valid number in Drop 2 increment")
             drop2inc_entry.focus_set()
-            return
+            return "ERROR"
         v_drop2inc = x
         
         x = get_check_float( delay2inc_duration.get())
         if( x == -1):
             messagebox.showerror("Error", "Please enter a valid number in delay after drop 2 increment")
             delay2inc_entry.focus_set()
-            return
+            return "ERROR"
         v_delay2inc = x   
     if(radSel < 3):
-        return
+        return "GOOD"
 # Third drop data    
     x = get_check_float( drop3duration.get())
     if( x == -1):
         messagebox.showerror("Error", "Please enter a valid number in Drop 3 Duration")
         drop3entry.focus_set()
-        return
+        return "ERROR"
     v_drop3duration = x
     
     x = get_check_float( delay3duration.get())
     if( x == -1):
         messagebox.showerror("Error", "Please enter a valid number in delay after drop 3")
         delay3entry.focus_set()
-        return
+        return "ERROR"
     v_delay3duration = x
 
     if( v_loops > 1):  
@@ -308,30 +309,30 @@ def get_save_data():
         if( x == -1):
             messagebox.showerror("Error", "Please enter a valid number in Drop 3 increment")
             drop3inc_entry.focus_set()
-            return
+            return "ERROR"
         v_drop3inc = x
         
         x = get_check_float( delay3inc_duration.get())
         if( x == -1):
             messagebox.showerror("Error", "Please enter a valid number in delay after drop 3 increment")
             delay3inc_entry.focus_set()
-            return
+            return "ERROR"
         v_delay3inc = x   
     if(radSel < 4):
-        return
+        return "GOOD"
 # Forth drop data    
     x = get_check_float( drop4duration.get())
     if( x == -1):
         messagebox.showerror("Error", "Please enter a valid number in Drop 4 Duration")
         drop4entry.focus_set()
-        return
+        return "ERROR"
     v_drop4duration = x
     
     x = get_check_float( delay4duration.get())
     if( x == -1):
         messagebox.showerror("Error", "Please enter a valid number in delay after drop 4")
         delay4entry.focus_set()
-        return
+        return "ERROR"
     v_delay4duration = x
 
     if( v_loops > 1):  
@@ -339,15 +340,16 @@ def get_save_data():
         if( x == -1):
             messagebox.showerror("Error", "Please enter a valid number in Drop 4 increment")
             drop4inc_entry.focus_set()
-            return
+            return "ERROR"
         v_drop4inc = x
         
         x = get_check_float( delay4inc_duration.get())
         if( x == -1):
             messagebox.showerror("Error", "Please enter a valid number in delay after drop 4 increment")
             delay4inc_entry.focus_set()
-            return
+            return "ERROR"
         v_delay4inc = x
+        return "GOOD"
 
 # Insert loop information in the database.
 def save_loop():
@@ -447,7 +449,7 @@ def open_loop():
     if( v_open_name == ''):
         messagebox.showerror("Error", "The loading loop name cannot be empty")
         open_name_entry.focus_set()
-        return
+        return "ERROR"
     statement = """SELECT * FROM inputtab WHERE loopname = ?"""
     with con:   
         cur = con.cursor()
@@ -477,13 +479,14 @@ def open_loop():
         save_comment.set(row[21]) # comments TEXT
     save_tick.set(0)
     action.configure(state='normal')
-    radCall()           
+    radCall()
+    return "GOOD"
 
 def open_photo():
     v_open_photo_value = get_check_int(open_photo_value.get())
     if( v_open_photo_value == -1):
         messagebox.showerror("Error", "The photo number must be a valid positive number")
-        return
+        return "ERROR"
     statement = """SELECT * FROM outputtab WHERE photo = ?"""
     with con:   
         cur = con.cursor()
@@ -503,10 +506,12 @@ def open_photo():
         save_comment.set( row[11]) # comments
     save_tick.set(0)
     action.configure(state='normal')
-    radCall()   
+    radCall()
+    return "GOOD"
 
 def open_action():
-    get_db_name()
+    if (get_db_name() == "EROOR"):
+        return
     open_db(v_db_name)    
     if( OpenRadSel == 1):
         open_loop()
@@ -514,8 +519,10 @@ def open_action():
         open_photo()
     
 def clickMe():
-    get_save_data()
-    get_db_name()
+    if (get_save_data()== "ERROR"):
+        return
+    if (get_db_name() == "EROOR"):
+        return
     open_db(v_db_name)
     create_tables()
     if (save_tick.get() == 1):
