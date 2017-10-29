@@ -8,8 +8,10 @@ import tkinter
 from tkinter import messagebox
 import sys
 import sqlite3 as lite
-#sys.path.append("C:\\Users\\user\\Documents\\Yousef\\ClickSplash_1\\procedures_defs")
-#import Procedures as pd
+from time import sleep
+#import RPi.GPIO as GPIO
+
+
 
 # Create instance
 win = tk.Tk()
@@ -383,7 +385,39 @@ def save_loop():
     with con:   
         cur = con.cursor()
         cur.execute(statement, inputtab_data)
-    
+def trigger_drops():
+#    GPIO.output(shutterpin,GPIO.HIGH)
+    sleep(0.1)
+#    GPIO.output(shutterpin,GPIO.LOW)
+#    GPIO.output(solenoidpin,GPIO.HIGH)
+    sleep(v_next_drop1duration/1000)
+#    GPIO.output(solenoidpin,GPIO.LOW)
+    sleep(v_delay1duration/1000)
+    if( radSel == 1):
+        return
+#    GPIO.output(solenoidpin,GPIO.HIGH)
+    sleep(v_next_drop2duration/1000)
+#    GPIO.output(solenoidpin,GPIO.LOW)
+    sleep(v_delay2duration/1000)
+    if( radSel == 2):
+        return
+#    GPIO.output(solenoidpin,GPIO.HIGH)
+    sleep(v_next_drop3duration/1000)
+#    GPIO.output(solenoidpin,GPIO.LOW)
+    sleep(v_delay3duration/1000)        
+    if( radSel == 3):
+        return
+#    GPIO.output(solenoidpin,GPIO.HIGH)
+    sleep(v_next_drop4duration/1000)
+#    GPIO.output(solenoidpin,GPIO.LOW)
+    sleep(v_delay4duration/1000)                
+
+
+def trigger_flash():
+#    GPIO.output(flashpin,GPIO.HIGH)
+    sleep(0.008)
+#    GPIO.output(flashpin,GPIO.LOW)
+
 def process_input():
     global v_next_photo
     global v_next_drop1duration
@@ -395,7 +429,19 @@ def process_input():
     global v_next_drop4duration
     global v_next_drop4delay
     global v_next_comments
+    global shutterpin
+    global solenoidpin
+    global flashpin
 
+    shutterpin = 17
+    solenoidpin = 18
+    flashpin = 25
+#    GPIO.setmode(GPIO.BCM)
+#    GPIO.setup(shutterpin,GPIO.OUT)
+#    GPIO.setup(solenoidpin,GPIO.OUT)
+#    GPIO.setup(flashpin,GPIO.OUT)
+
+ 
     v_next_photo = v_photo_number
     v_next_drop1duration = v_drop1duration
     v_next_drop1delay = v_delay1duration
@@ -405,10 +451,14 @@ def process_input():
     v_next_drop3delay = v_delay3duration
     v_next_drop4duration = v_drop4duration
     v_next_drop4delay = v_delay4duration
-    v_next_comments = ""
+    v_next_comments = "1"
+    trigger_drops()
+    trigger_flash()
+
     if (save_tick.get() == 1):
         insert_output()
-    for seq in range(2, v_loops ):
+    for seq in range(2, v_loops +1 ):
+        v_next_comments = str(seq)
         v_next_photo = v_next_photo +1
         v_next_drop1duration = v_next_drop1duration + v_drop1inc
         v_next_drop1delay = v_next_drop1delay + v_delay1inc
@@ -421,8 +471,11 @@ def process_input():
         if (radSel > 3):
             v_next_drop4duration = v_next_drop4duration + v_drop4inc
             v_next_drop4delay = v_next_drop4delay + v_delay4inc
+        trigger_drops()
+        trigger_flash()
         if (save_tick.get() == 1):    
-            insert_output()    
+            insert_output()
+#    GPIO.cleanup()                
         
 def insert_output():
     outputtab_data = (
