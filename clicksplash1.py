@@ -1,4 +1,3 @@
-
 #======================
 # imports
 #======================
@@ -9,7 +8,7 @@ from tkinter import messagebox
 import sys
 import sqlite3 as lite
 from time import sleep
-#import RPi.GPIO as GPIO
+import RPi.GPIO as GPIO
 
 
 
@@ -93,7 +92,7 @@ def open_db(db_name):
 # Sql function
 def create_tables():
 #    con = lite.connect(v_db_name)
-    with con:   
+    with con:
         cur = con.cursor()
         create_inputtab = """CREATE TABLE IF NOT EXISTS inputtab(
                                  loopname TEXT PRIMERY KEY UNIQUE,
@@ -101,24 +100,24 @@ def create_tables():
                                  drops INT,
                                  drop1duration REAL,
                                  drop1delay REAL,
-                                 drop1inc REAL,                               
-                                 delay1inc REAL,                                 
+                                 drop1inc REAL,
+                                 delay1inc REAL,
                                  drop2duration REAL,
                                  drop2delay REAL,
                                  drop2inc REAL,
-                                 delay2inc REAL,                                 
+                                 delay2inc REAL,
                                  drop3duration REAL,
                                  drop3delay REAL,
                                  drop3inc REAL,
-                                 delay3inc REAL,                                 
-                                 drop4duration REAL,                                
+                                 delay3inc REAL,
+                                 drop4duration REAL,
                                  drop4delay REAL,
                                  drop4inc REAL,
                                  delay4inc REAL,
                                  loops INT,
-                                 loop_delay INT,                                 
+                                 loop_delay INT,
                                  comments TEXT
-                             ); """        
+                             ); """
         cur.execute(create_inputtab)
         create_outputtab = """CREATE TABLE IF NOT EXISTS outputtab(
                                  photo INT PRIMERY KEY UNIQUE,
@@ -141,15 +140,15 @@ def get_check_float( i):
         return( float(i))
     except ValueError:
         return( -1)
-    
+
 def get_check_int( i):
     try:
         return( int(i))
     except ValueError:
-        return( -1)
-    
+        return( -9999)
+
 def get_db_name():
-    global v_db_name    
+    global v_db_name
     v_db_name = db_name.get()
     if( v_db_name == ''):
         messagebox.showerror("Error", "The database name cannot be empty")
@@ -157,7 +156,16 @@ def get_db_name():
         return "ERROR"
     v_db_name = v_db_name + ".db"
     return "GOOD"
-    
+
+# process save_tick
+def do_save_tick():
+    global v_save_tick
+    v_save_tick = save_tick.get()
+    if( v_save_tick == 1):
+       save_name_entry.configure(state='normal')
+    else:
+       save_name_entry.configure(state='disabled')
+
 def get_save_data():
     # declare and initialise variables
 
@@ -185,13 +193,13 @@ def get_save_data():
 
     # Get save name and comment
     v_save_name = save_name.get()
-    if( v_save_name == ''):
+    if( v_save_name == '' and v_save_tick == 1):
         messagebox.showerror("Error", "The save name cannot be empty")
         loops_entry.focus_set()
         return "ERROR"
-    
+
     v_save_comment = save_comment.get()
-    
+
     v_drop1duration = 0
     v_delay1duration = 0
     v_drop1inc = 0
@@ -207,7 +215,7 @@ def get_save_data():
     v_drop4duration = 0
     v_delay4duration = 0
     v_drop4inc = 0
-    v_delay4inc = 0    
+    v_delay4inc = 0
 # Get Loops data
     x = get_check_int(loops_value.get())
     if( x < 1):
@@ -221,53 +229,53 @@ def get_save_data():
         delay_loop_entry.focus_set()
         return "ERROR"
     v_loop_delay = x
-    
+
 # Get photo_number data
     x = get_check_int(photo_number_value.get())
     if( x < 1):
         messagebox.showerror("Error", "Please enter a valid positive number for photo_number")
         photo_number_entry.focus_set()
         return "ERROR"
-    v_photo_number = x    
-# First drop data    
+    v_photo_number = x
+# First drop data
     x = get_check_float( drop1duration.get())
-    if( x == -1):
+    if( x < 0):
         messagebox.showerror("Error", "Please enter a valid number in Drop 1 Duration")
         drop1entry.focus_set()
         return "ERROR"
     v_drop1duration = x
-    
+
     x = get_check_float( delay1duration.get())
-    if( x == -1):
+    if( x < 0):
         messagebox.showerror("Error", "Please enter a valid number in delay after drop 1")
         delay1entry.focus_set()
         return "ERROR"
     v_delay1duration = x
 
-    if( v_loops > 1):  
+    if( v_loops > 1):
         x = get_check_float( drop1inc.get())
-        if( x == -1):
+        if( x == -9999):
             messagebox.showerror("Error", "Please enter a valid number in Drop 1 increment")
             drop1inc_entry.focus_set()
             return "ERROR"
         v_drop1inc = x
-        
+
         x = get_check_float( delay1inc_duration.get())
-        if( x == -1):
+        if( x == -9999):
             messagebox.showerror("Error", "Please enter a valid number in delay after drop 1 increment")
             delay1inc_entry.focus_set()
             return "ERROR"
-        v_delay1inc = x   
+        v_delay1inc = x
     if(radSel < 2):
         return "GOOD"
-# Second drop data    
+# Second drop data
     x = get_check_float( drop2duration.get())
-    if( x == -1):
+    if( x < 0):
         messagebox.showerror("Error", "Please enter a valid number in Drop 2 Duration")
         drop2entry.focus_set()
         return "ERROR"
     v_drop2duration = x
-    
+
     x = get_check_float( delay2duration.get())
     if( x == -1):
         messagebox.showerror("Error", "Please enter a valid number in delay after drop 2")
@@ -275,78 +283,78 @@ def get_save_data():
         return "ERROR"
     v_delay2duration = x
 
-    if( v_loops > 1):  
+    if( v_loops > 1):
         x = get_check_float( drop2inc.get())
-        if( x == -1):
+        if( x == -9999):
             messagebox.showerror("Error", "Please enter a valid number in Drop 2 increment")
             drop2inc_entry.focus_set()
             return "ERROR"
         v_drop2inc = x
-        
+
         x = get_check_float( delay2inc_duration.get())
-        if( x == -1):
+        if( x == -9999):
             messagebox.showerror("Error", "Please enter a valid number in delay after drop 2 increment")
             delay2inc_entry.focus_set()
             return "ERROR"
-        v_delay2inc = x   
+        v_delay2inc = x
     if(radSel < 3):
         return "GOOD"
-# Third drop data    
+# Third drop data
     x = get_check_float( drop3duration.get())
-    if( x == -1):
+    if( x < 0):
         messagebox.showerror("Error", "Please enter a valid number in Drop 3 Duration")
         drop3entry.focus_set()
         return "ERROR"
     v_drop3duration = x
-    
+
     x = get_check_float( delay3duration.get())
-    if( x == -1):
+    if( x < 0):
         messagebox.showerror("Error", "Please enter a valid number in delay after drop 3")
         delay3entry.focus_set()
         return "ERROR"
     v_delay3duration = x
 
-    if( v_loops > 1):  
+    if( v_loops > 1):
         x = get_check_float( drop3inc.get())
-        if( x == -1):
+        if( x == -9999):
             messagebox.showerror("Error", "Please enter a valid number in Drop 3 increment")
             drop3inc_entry.focus_set()
             return "ERROR"
         v_drop3inc = x
-        
+
         x = get_check_float( delay3inc_duration.get())
-        if( x == -1):
+        if( x == -9999):
             messagebox.showerror("Error", "Please enter a valid number in delay after drop 3 increment")
             delay3inc_entry.focus_set()
             return "ERROR"
-        v_delay3inc = x   
+        v_delay3inc = x
     if(radSel < 4):
         return "GOOD"
-# Forth drop data    
+# Forth drop data
     x = get_check_float( drop4duration.get())
-    if( x == -1):
+    if( x < 0):
         messagebox.showerror("Error", "Please enter a valid number in Drop 4 Duration")
         drop4entry.focus_set()
         return "ERROR"
     v_drop4duration = x
-    
+
     x = get_check_float( delay4duration.get())
-    if( x == -1):
+    if( x < 0):
         messagebox.showerror("Error", "Please enter a valid number in delay after drop 4")
         delay4entry.focus_set()
         return "ERROR"
     v_delay4duration = x
 
-    if( v_loops > 1):  
+    if( v_loops > 1):
         x = get_check_float( drop4inc.get())
-        if( x == -1):
+        if( x == -9999):
             messagebox.showerror("Error", "Please enter a valid number in Drop 4 increment")
             drop4inc_entry.focus_set()
             return "ERROR"
         v_drop4inc = x
-        
+
         x = get_check_float( delay4inc_duration.get())
-        if( x == -1):
+        if( x == -9999):
             messagebox.showerror("Error", "Please enter a valid number in delay after drop 4 increment")
             delay4inc_entry.focus_set()
             return "ERROR"
@@ -355,7 +363,7 @@ def get_save_data():
 
 # Insert loop information in the database.
 def save_loop():
-    global v_inputtab_data    
+    global v_inputtab_data
     inputtab_data = (
         v_save_name,
         v_photo_number,
@@ -382,41 +390,45 @@ def save_loop():
     )
     statement = """ INSERT INTO inputtab VALUES( ?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?,?)"""
 #    con = lite.connect(v_db_name)
-    with con:   
+    with con:
         cur = con.cursor()
         cur.execute(statement, inputtab_data)
+
 def trigger_drops():
-#    GPIO.output(shutterpin,GPIO.HIGH)
+
+    GPIO.output(shutterpin,GPIO.HIGH)
     sleep(0.1)
-#    GPIO.output(shutterpin,GPIO.LOW)
-#    GPIO.output(solenoidpin,GPIO.HIGH)
+    GPIO.output(shutterpin,GPIO.LOW)
+    sleep(0.1)
+    GPIO.output(solenoidpin,GPIO.HIGH)
     sleep(v_next_drop1duration/1000)
-#    GPIO.output(solenoidpin,GPIO.LOW)
-    sleep(v_delay1duration/1000)
+    GPIO.output(solenoidpin,GPIO.LOW)
+    sleep(v_next_drop1delay/1000)
     if( radSel == 1):
         return
-#    GPIO.output(solenoidpin,GPIO.HIGH)
+    GPIO.output(solenoidpin,GPIO.HIGH)
     sleep(v_next_drop2duration/1000)
-#    GPIO.output(solenoidpin,GPIO.LOW)
+    GPIO.output(solenoidpin,GPIO.LOW)
     sleep(v_delay2duration/1000)
     if( radSel == 2):
         return
-#    GPIO.output(solenoidpin,GPIO.HIGH)
+    GPIO.output(solenoidpin,GPIO.HIGH)
     sleep(v_next_drop3duration/1000)
-#    GPIO.output(solenoidpin,GPIO.LOW)
-    sleep(v_delay3duration/1000)        
+    GPIO.output(solenoidpin,GPIO.LOW)
+    sleep(v_delay3duration/1000)
     if( radSel == 3):
         return
-#    GPIO.output(solenoidpin,GPIO.HIGH)
+    GPIO.output(solenoidpin,GPIO.HIGH)
     sleep(v_next_drop4duration/1000)
-#    GPIO.output(solenoidpin,GPIO.LOW)
-    sleep(v_delay4duration/1000)                
+    GPIO.output(solenoidpin,GPIO.LOW)
+    sleep(v_delay4duration/1000)
 
 
 def trigger_flash():
-#    GPIO.output(flashpin,GPIO.HIGH)
+    flashpin = 25
+    GPIO.output(flashpin,GPIO.HIGH)
     sleep(0.008)
-#    GPIO.output(flashpin,GPIO.LOW)
+    GPIO.output(flashpin,GPIO.LOW)
 
 def process_input():
     global v_next_photo
@@ -436,12 +448,12 @@ def process_input():
     shutterpin = 17
     solenoidpin = 18
     flashpin = 25
-#    GPIO.setmode(GPIO.BCM)
-#    GPIO.setup(shutterpin,GPIO.OUT)
-#    GPIO.setup(solenoidpin,GPIO.OUT)
-#    GPIO.setup(flashpin,GPIO.OUT)
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(shutterpin,GPIO.OUT)
+    GPIO.setup(solenoidpin,GPIO.OUT)
+    GPIO.setup(flashpin,GPIO.OUT)
 
- 
+
     v_next_photo = v_photo_number
     v_next_drop1duration = v_drop1duration
     v_next_drop1delay = v_delay1duration
@@ -454,6 +466,7 @@ def process_input():
     v_next_comments = "1"
     trigger_drops()
     trigger_flash()
+    sleep(v_loop_delay)
 
     if (save_tick.get() == 1):
         insert_output()
@@ -467,16 +480,18 @@ def process_input():
             v_next_drop2delay = v_next_drop2delay + v_delay2inc
         if (radSel > 2):
             v_next_drop3duration = v_next_drop3duration + v_drop3inc
-            v_next_drop3delay = v_next_drop3delay + v_delay3inc            
+            v_next_drop3delay = v_next_drop3delay + v_delay3inc
         if (radSel > 3):
             v_next_drop4duration = v_next_drop4duration + v_drop4inc
             v_next_drop4delay = v_next_drop4delay + v_delay4inc
         trigger_drops()
         trigger_flash()
-        if (save_tick.get() == 1):    
+        sleep(v_loop_delay)
+
+        if (save_tick.get() == 1):
             insert_output()
-#    GPIO.cleanup()                
-        
+    GPIO.cleanup()
+
 def insert_output():
     outputtab_data = (
         v_next_photo ,
@@ -490,10 +505,10 @@ def insert_output():
         v_next_drop3delay ,
         v_next_drop4duration ,
         v_next_drop4delay ,
-        v_next_comments 
+        v_next_comments
         )
     statement = """ INSERT INTO outputtab VALUES( ?,?,?,?,?, ?,?,?,?,?, ?,?)"""
-    with con:   
+    with con:
         cur = con.cursor()
         cur.execute(statement, outputtab_data)
 
@@ -504,7 +519,7 @@ def open_loop():
         open_name_entry.focus_set()
         return "ERROR"
     statement = """SELECT * FROM inputtab WHERE loopname = ?"""
-    with con:   
+    with con:
         cur = con.cursor()
         cur.execute(statement,[open_name.get()] )
         row = cur.fetchone()
@@ -541,7 +556,7 @@ def open_photo():
         messagebox.showerror("Error", "The photo number must be a valid positive number")
         return "ERROR"
     statement = """SELECT * FROM outputtab WHERE photo = ?"""
-    with con:   
+    with con:
         cur = con.cursor()
         cur.execute(statement, [open_photo_value.get()])
         row = cur.fetchone()
@@ -565,12 +580,12 @@ def open_photo():
 def open_action():
     if (get_db_name() == "EROOR"):
         return
-    open_db(v_db_name)    
+    open_db(v_db_name)
     if( OpenRadSel == 1):
         open_loop()
     elif (OpenRadSel == 2):
         open_photo()
-    
+
 def clickMe():
     if (get_save_data()== "ERROR"):
         return
@@ -582,7 +597,7 @@ def clickMe():
         save_loop()
     process_input()
 
-    
+
 # Adding water drop duration
 
 drop1duration = tk.StringVar()
@@ -660,7 +675,7 @@ save_comment_entry = ttk.Entry(savetab, width=35, textvariable=save_comment)
 save_comment_entry.grid(column=1, row=2, sticky=tk.W)
 
 save_tick = tk.IntVar()
-save_tick_entry = ttk.Checkbutton(savetab, variable=save_tick)
+save_tick_entry = ttk.Checkbutton(savetab, variable=save_tick, command=do_save_tick)
 save_tick_entry.grid(column=1, row=3, sticky=tk.W)
 save_tick.set(1)
 
@@ -702,7 +717,7 @@ photo_number_value.set("1")
 
 radVar = tk.IntVar()
 
-def OpenRadCall():            
+def OpenRadCall():
     global OpenRadSel
     OpenRadSel=OpenRadVar.get()
     if (OpenRadSel == 1):
@@ -714,28 +729,28 @@ def OpenRadCall():
         open_photo_entry.configure(state='normal')
         open_name_entry.configure(state='disabled')
         open_button.configure(state='normal')
-        open_button.configure(text='Load Photo Number ')                      
+        open_button.configure(text='Load Photo Number ')
     elif (OpenRadSel == 3):
         open_photo_entry.configure(state='disabled')
         open_name_entry.configure(state='disabled')
         open_button.configure(text='Click on Loop or Photo to load ')
         open_button.configure(state='disabled')
-    
+
 def radCall():
     action.configure(state='normal')
-    action1.configure(state='normal')            
+    action1.configure(state='normal')
     global radSel
-    radSel=radVar.get()	
+    radSel=radVar.get()
     if  radSel == 1:
-	# Drops
+        # Drops
         drop2entry.configure(state='disabled')
         drop3entry.configure(state='disabled')
         drop4entry.configure(state='disabled')
-        
+
         drop2inc_entry.configure(state='disabled')
         drop3inc_entry.configure(state='disabled')
-        drop4inc_entry.configure(state='disabled')        
-	# Delays
+        drop4inc_entry.configure(state='disabled')
+        # Delays
         delay2entry.configure(state='disabled')
         delay3entry.configure(state='disabled')
         delay4entry.configure(state='disabled')
@@ -744,38 +759,38 @@ def radCall():
         delay3inc_entry.configure(state='disabled')
         delay4inc_entry.configure(state='disabled')
     elif radSel == 2:
-	# Drops
+        # Drops
         drop2entry.configure(state='normal')
         drop3entry.configure(state='disabled')
         drop4entry.configure(state='disabled')
-        
+
         drop2inc_entry.configure(state='normal')
         drop3inc_entry.configure(state='disabled')
-        drop4inc_entry.configure(state='disabled')       
-	# Delay
+        drop4inc_entry.configure(state='disabled')
+        # Delay
         delay2entry.configure(state='normal')
         delay3entry.configure(state='disabled')
         delay4entry.configure(state='disabled')
-        
+
         delay2inc_entry.configure(state='normal')
         delay3inc_entry.configure(state='disabled')
-        delay4inc_entry.configure(state='disabled')        
+        delay4inc_entry.configure(state='disabled')
     elif radSel == 3:
         drop2entry.configure(state='normal')
         drop3entry.configure(state='normal')
         drop4entry.configure(state='disabled')
-        
+
         drop2inc_entry.configure(state='normal')
         drop3inc_entry.configure(state='normal')
-        drop4inc_entry.configure(state='disabled')        
-	# Delay
+        drop4inc_entry.configure(state='disabled')
+        # Delay
         delay2entry.configure(state='normal')
         delay3entry.configure(state='normal')
         delay4entry.configure(state='disabled')
 
         delay2inc_entry.configure(state='normal')
         delay3inc_entry.configure(state='normal')
-        delay4inc_entry.configure(state='disabled')	        
+        delay4inc_entry.configure(state='disabled')
     elif radSel == 4:
         drop2entry.configure(state='normal')
         drop3entry.configure(state='normal')
@@ -783,22 +798,22 @@ def radCall():
 
         drop2inc_entry.configure(state='normal')
         drop3inc_entry.configure(state='normal')
-        drop4inc_entry.configure(state='normal')        
-	# Delay
+        drop4inc_entry.configure(state='normal')
+        # Delay
         delay2entry.configure(state='normal')
         delay3entry.configure(state='normal')
         delay4entry.configure(state='normal')
-        
+
         delay2inc_entry.configure(state='normal')
         delay3inc_entry.configure(state='normal')
-        delay4inc_entry.configure(state='normal')        
+        delay4inc_entry.configure(state='normal')
 
 tk.Label(droptab, text="Number of Drops:").grid(column=0, row=0)
 # create 4 Radiobuttons using one variable
 rad1 = tk.Radiobutton(droptab, text="1", variable=radVar, value=1, command=radCall)
-rad1.grid(column=1, row=0)   
+rad1.grid(column=1, row=0)
 rad2 = tk.Radiobutton(droptab, text="2", variable=radVar, value=2, command=radCall)
-rad2.grid(column=2, row=0)   
+rad2.grid(column=2, row=0)
 rad3 = tk.Radiobutton(droptab, text="3", variable=radVar, value=3, command=radCall)
 rad3.grid(column=3, row=0)
 rad4 = tk.Radiobutton(droptab, text="4", variable=radVar, value=4, command=radCall)
@@ -807,9 +822,9 @@ rad4.grid(column=4, row=0)
 # Create 3 Radio Buttons
 OpenRadVar = tk.IntVar()
 OpenRad1 = tk.Radiobutton(opentab, text="Loop", variable=OpenRadVar, value=1, command=OpenRadCall)
-OpenRad1.grid(column=0, row=3, sticky=tk.W)   
+OpenRad1.grid(column=0, row=3, sticky=tk.W)
 OpenRad2 = tk.Radiobutton(opentab, text="Photo", variable=OpenRadVar, value=2, command=OpenRadCall)
-OpenRad2.grid(column=1, row=3, sticky=tk.W)   
+OpenRad2.grid(column=1, row=3, sticky=tk.W)
 OpenRad3 = tk.Radiobutton(opentab, text="None", variable=OpenRadVar, value=3, command=OpenRadCall)
 OpenRad3.grid(column=2, row=3, sticky=tk.W)
 OpenRadVar.set(3)
